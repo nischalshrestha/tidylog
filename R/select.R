@@ -48,7 +48,7 @@ log_select <- function(.data, .fun, .funname, ...) {
                            " and dropped {plural(n_dropped, 'variable')}"))
     } else if (length(dropped_vars) > 0) {
         # dropped only
-        display(glue::glue("{.funname}: dropped {plural(length(dropped_vars), 'variable')}",
+        display(glue::glue("<code class='code'>{.funname}</code> dropped {plural(length(dropped_vars), 'variable')}",
                            " ({format_list(dropped_vars)})"))
     } else {
         # no dropped, no removed
