@@ -31,6 +31,7 @@ percent <- function(n, total) {
 
 #' @import clisymbols
 format_list <- function(items) {
+    items <- paste0("<code class='code'>", items, "</code>")
     if (length(items) <= 5) {
         paste0(items, collapse = ", ")
     } else {

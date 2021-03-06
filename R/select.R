@@ -33,30 +33,33 @@ log_select <- function(.data, .fun, .funname, ...) {
     dropped_vars <- setdiff(cols, names(newdata))
     renamed_vars <- setdiff(names(newdata), cols)
 
+    # TODO:
+    # - data change [row x column]
     if (ncol(newdata) == 0) {
-        display(glue::glue("{.funname}: dropped all variables"))
+        display(glue::glue("<code class='code'>{.funname}</code> dropped all variables."))
     } else if (length(renamed_vars) > 0 & length(renamed_vars) == length(dropped_vars)) {
         # renamed only
-        display(glue::glue("{.funname}: renamed {plural(length(renamed_vars), 'variable')}",
-                           " ({format_list(renamed_vars)})"))
+        # TODO: want to know the old variable name so we can say renamed "old" to "new"
+        display(glue::glue("<code class='code'>{.funname}</code> renamed {plural(length(renamed_vars), 'variable')}",
+                           " ({format_list(renamed_vars)})."))
     } else if (length(dropped_vars) > 0 & length(renamed_vars) > 0) {
         # dropped & renamed
         n_dropped <- length(dropped_vars) - length(renamed_vars)
-        display(glue::glue("{.funname}: ",
+        display(glue::glue("<code class='code'>{.funname}</code> ",
                            "renamed {plural(length(renamed_vars), 'variable')}",
                            " ({format_list(renamed_vars)})",
-                           " and dropped {plural(n_dropped, 'variable')}"))
+                           " and dropped {plural(n_dropped, 'variable')}."))
     } else if (length(dropped_vars) > 0) {
         # dropped only
         display(glue::glue("<code class='code'>{.funname}</code> dropped {plural(length(dropped_vars), 'variable')}",
-                           " ({format_list(dropped_vars)})"))
+                           " ({format_list(dropped_vars)})."))
     } else {
         # no dropped, no removed
         if (all(names(newdata) == cols)) {
-            display(glue::glue("{.funname}: no changes"))
+            display(glue::glue("<code class='code'>{.funname}</code> resulted in no changes."))
         } else {
-            display(glue::glue("{.funname}: columns reordered",
-                               " ({format_list(names(newdata))})"))
+            display(glue::glue("<code class='code'>{.funname}</code> reordered columns ",
+                               " ({format_list(names(newdata))})."))
         }
     }
 
