@@ -30,36 +30,39 @@ log_select <- function(.data, .fun, .funname, ...) {
         return(newdata)
     }
 
-    dropped_vars <- setdiff(cols, names(newdata))
-    renamed_vars <- setdiff(names(newdata), cols)
+    newcols <- names(newdata)
+    dropped_vars <- setdiff(cols, newcols)
+    renamed_vars <- setdiff(newcols, cols)
 
-    # TODO:
-    # - data change [row x column]
+    # set up some repetitive strings
+    fun_name <- glue::glue("<code class='code'>{.funname}</code>")
+    data_change_summary <- get_shape_summary(fun_name, .data, newdata)
+
     if (ncol(newdata) == 0) {
-        display(glue::glue("<code class='code'>{.funname}</code> dropped all variables."))
+        display(glue::glue("{data_change_summary}", "{fun_name} dropped all variables.", .sep = " "))
     } else if (length(renamed_vars) > 0 & length(renamed_vars) == length(dropped_vars)) {
         # renamed only
         # TODO: want to know the old variable name so we can say renamed "old" to "new"
-        display(glue::glue("<code class='code'>{.funname}</code> renamed {plural(length(renamed_vars), 'variable')}",
-                           " ({format_list(renamed_vars)})."))
+        display(glue::glue("{data_change_summary}", "{fun_name} renamed {plural(length(renamed_vars), 'variable')}",
+                           "({format_list(renamed_vars)}).", .sep = " "))
     } else if (length(dropped_vars) > 0 & length(renamed_vars) > 0) {
         # dropped & renamed
         n_dropped <- length(dropped_vars) - length(renamed_vars)
-        display(glue::glue("<code class='code'>{.funname}</code> ",
+        display(glue::glue("{data_change_summary}", "{fun_name} ",
                            "renamed {plural(length(renamed_vars), 'variable')}",
-                           " ({format_list(renamed_vars)})",
-                           " and dropped {plural(n_dropped, 'variable')}."))
+                           "({format_list(renamed_vars)})",
+                           "and dropped {plural(n_dropped, 'variable')}.", .sep = " "))
     } else if (length(dropped_vars) > 0) {
         # dropped only
-        display(glue::glue("<code class='code'>{.funname}</code> dropped {plural(length(dropped_vars), 'variable')}",
-                           " ({format_list(dropped_vars)})."))
+        display(glue::glue("{data_change_summary}", "{fun_name} dropped {plural(length(dropped_vars), 'variable')}",
+                           "({format_list(dropped_vars)}).", .sep = " "))
     } else {
         # no dropped, no removed
         if (all(names(newdata) == cols)) {
-            display(glue::glue("<code class='code'>{.funname}</code> resulted in no changes."))
+            display(glue::glue("{data_change_summary}", "{fun_name} resulted in no changes.", .sep = " "))
         } else {
-            display(glue::glue("<code class='code'>{.funname}</code> reordered columns ",
-                               " ({format_list(names(newdata))})."))
+            display(glue::glue("{data_change_summary}", "{fun_name} reordered columns",
+                               "({format_list(names(newdata))}).", .sep = " "))
         }
     }
 

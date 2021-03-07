@@ -86,6 +86,27 @@ should_display <- function() {
     is.null(getOption("tidylog.display")) | length(getOption("tidylog.display")) > 0
 }
 
+# helper function that returns a string describing how a function changed the data
+# empty string if no change, otherwise the summary statement of dimensions changed
+get_shape_summary <- function(fun_name, .data, newdata) {
+    data_shape_change <- ""
+    # find differences in shape
+    row_diff <- nrow(.data) - nrow(newdata)
+    col_diff <- ncol(.data) - ncol(newdata)
+    # if there were any shape differences, state how the shape changed
+    if (row_diff != 0 || col_diff != 0) {
+        # for now, we'll just highlight the whole [row x col] for new data
+        # TODO but, we could more intelligently highlight either row or col
+        data_shape_change <- glue::glue(
+            "{fun_name} changed the dataframe shape from",
+            "[{nrow(.data)} x {ncol(.data)}] to",
+            "<span class = 'visible-change number'>[{nrow(newdata)} x {ncol(newdata)}]</span>.",
+            .sep = " "
+        )
+    }
+    return(data_shape_change)
+}
+
 #' outputs some information about the data frame/tbl
 #'
 #' @param .data a tbl/data frame
