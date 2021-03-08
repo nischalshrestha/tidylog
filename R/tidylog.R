@@ -30,9 +30,13 @@ percent <- function(n, total) {
 }
 
 #' @import clisymbols
-format_list <- function(items, .code_wrap = TRUE) {
+format_list <- function(items, .code_wrap = TRUE, .code_class = "") {
+    code_class <- glue::glue("code", "{.code_class}", .sep = " ")
+    if (!nzchar(.code_class)) {
+        code_class <- "code"
+    }
     if (.code_wrap) {
-        items <- paste0("<code class='code'>", items, "</code>")
+        items <- paste0(glue::glue("<code class='{code_class}'>"), items, "</code>")
     }
     if (length(items) <= 5) {
         paste0(items, collapse = ", ")

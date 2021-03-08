@@ -28,13 +28,21 @@ log_group_by <- function(.data, .fun, .funname, ...) {
     if (!"data.frame" %in% class(.data) | !should_display()) {
         return(newdata)
     }
+
+    # set up some repetitive strings
+    fun_name <- glue::glue("<code class='code'>{.funname}</code>")
+    data_change_summary <- glue::glue("{fun_name} has no visible effect on the data.")
+
     group_vars <- get_groups(newdata)
     if (is.null(group_vars)) {
-        display(glue::glue("{.funname}: no grouping variables remain"))
+        display(glue::glue("{data_change_summary}", "{fun_name} did not group any variables.", .sep = " "))
     } else {
         display(glue::glue(
-            "{.funname}: {plural(length(group_vars), 'grouping variable')} ",
-            "({format_list(group_vars)})"))
+            "{data_change_summary}",
+            "{fun_name} has internally grouped {plural(length(group_vars), 'variable')}",
+            "({format_list(group_vars, .code_class ='internal-change')})",
+            .sep = " ")
+        )
     }
     newdata
 }
