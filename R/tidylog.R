@@ -30,8 +30,10 @@ percent <- function(n, total) {
 }
 
 #' @import clisymbols
-format_list <- function(items) {
-    items <- paste0("<code class='code'>", items, "</code>")
+format_list <- function(items, .code_wrap = TRUE) {
+    if (.code_wrap) {
+        items <- paste0("<code class='code'>", items, "</code>")
+    }
     if (length(items) <= 5) {
         paste0(items, collapse = ", ")
     } else {
@@ -107,6 +109,15 @@ get_shape_summary <- function(fun_name, .data, newdata) {
     return(data_shape_change)
 }
 
+# helper function used in verbs like `select`/`rename` to return a comma separated character vector
+# of "old" to "new" column name pairs
+get_column_change_pairs <- function(args, renamed_vars) {
+    renamed_from <- lapply(args[renamed_vars], function(x) rlang::as_name(x))
+    formatted_names <- paste0("<code class = 'code visible-change'>", names(renamed_from), "</code>")
+    formatted_vals <- paste0("<code class = 'code'>", renamed_from, "</code>")
+    return(paste0(formatted_vals, " to ", formatted_names))
+}
+
 #' outputs some information about the data frame/tbl
 #'
 #' @param .data a tbl/data frame
@@ -133,4 +144,31 @@ tidylog <- function(.data) {
     display(glue::glue("tidylog: {type} with {plural(nrow(.data), 'row')} and ",
         "{plural(ncol(.data), 'column')}"))
     .data
+}
+
+#' A functional version of `tidylog`, where the display string is returned instead of displayed
+#'
+#' @param .data a tbl/data frame
+#'
+#' @return character
+#' @export
+#'
+#' @examples
+#' get_data_summary(mtcars)
+get_data_summary <- function(.data) {
+    if (!"data.frame" %in% class(.data)) {
+        return(.data)
+    }
+
+    if ("grouped_df" %in% class(.data)) {
+        type <- glue::glue("grouped tibble")
+    } else if ("tbl" %in% class(.data)) {
+        type <- "tibble"
+    } else if ("data.table" %in% class(.data)) {
+        type <- "data.table"
+    } else {
+        type <- "data.frame"
+    }
+
+    return(glue::glue("{type} with {plural(nrow(.data), 'row')} and {plural(ncol(.data), 'column')}"))
 }

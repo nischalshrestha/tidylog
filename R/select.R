@@ -33,6 +33,7 @@ log_select <- function(.data, .fun, .funname, ...) {
     newcols <- names(newdata)
     dropped_vars <- setdiff(cols, newcols)
     renamed_vars <- setdiff(newcols, cols)
+    args <- rlang::enquos(...)
 
     # set up some repetitive strings
     fun_name <- glue::glue("<code class='code'>{.funname}</code>")
@@ -42,15 +43,18 @@ log_select <- function(.data, .fun, .funname, ...) {
         display(glue::glue("{data_change_summary}", "{fun_name} dropped all variables.", .sep = " "))
     } else if (length(renamed_vars) > 0 & length(renamed_vars) == length(dropped_vars)) {
         # renamed only
-        # TODO: want to know the old variable name so we can say renamed "old" to "new"
+        # get the "old" to "new" strings
+        all_renamed_pairs <- get_column_change_pairs(args, renamed_vars)
         display(glue::glue("{data_change_summary}", "{fun_name} renamed {plural(length(renamed_vars), 'variable')}",
-                           "({format_list(renamed_vars)}).", .sep = " "))
+                           "({format_list(all_renamed_pairs, .code_wrap = FALSE)})", .sep = " "))
     } else if (length(dropped_vars) > 0 & length(renamed_vars) > 0) {
         # dropped & renamed
+        # get the "old" to "new" strings
+        all_renamed_pairs <- get_column_change_pairs(args, renamed_vars)
         n_dropped <- length(dropped_vars) - length(renamed_vars)
-        display(glue::glue("{data_change_summary}", "{fun_name} ",
-                           "renamed {plural(length(renamed_vars), 'variable')}",
-                           "({format_list(renamed_vars)})",
+        display(glue::glue("{data_change_summary}",
+                           "{fun_name} renamed {plural(length(renamed_vars), 'variable')}",
+                           "({format_list(all_renamed_pairs, .code_wrap = FALSE)})",
                            "and dropped {plural(n_dropped, 'variable')}.", .sep = " "))
     } else if (length(dropped_vars) > 0) {
         # dropped only
