@@ -29,12 +29,21 @@ log_longer_wider <- function(.data, .fun, .funname, ...) {
     newcols <- setdiff(names(newdata), names(.data))
     oldcols <- setdiff(names(.data), names(newdata))
 
+    # set up some repetitive strings
+    verb <- ""
+    if (.funname %in% c("spread", "pivot_wider")) {
+        verb <- "widened"
+    } else if (.funname %in% c("gather", "pivot_longer")) {
+        verb <- "lengthened"
+    }
+    fun_name <- glue::glue("<code class='code'>{.funname}</code>")
+    data_change_summary <- get_shape_summary(fun_name, .data, newdata)
+
     display(glue::glue(
-        "{.funname}: ",
-        "reorganized ({format_list(oldcols)}) ",
-        "into ({format_list(newcols)}) ",
-        "[was {nrow(.data)}x{ncol(.data)}, ",
-        "now {nrow(newdata)}x{ncol(newdata)}]"
+        data_change_summary,
+        "{fun_name} {verb} the data by reorganizing ({format_list(oldcols)})",
+        "into ({format_list(code_wrap(newcols, .code_class = 'visible-change'), .code_wrap = F)}).",
+        .sep = " "
     ))
 
     newdata

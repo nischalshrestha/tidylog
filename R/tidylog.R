@@ -110,7 +110,7 @@ get_shape_summary <- function(fun_name, .data, newdata) {
         # TODO but, we could more intelligently highlight either row or col
         data_shape_change <- glue::glue(
             "{fun_name} changed the dataframe shape from",
-            "[{nrow(.data)} x {ncol(.data)}] to",
+            "<span class = 'number'>[{nrow(.data)} x {ncol(.data)}]</span> to",
             "<span class = 'visible-change number'>[{nrow(newdata)} x {ncol(newdata)}]</span>.",
             .sep = " "
         )
