@@ -29,14 +29,19 @@ percent <- function(n, total) {
     }
 }
 
-#' @import clisymbols
-format_list <- function(items, .code_wrap = TRUE, .code_class = "") {
+# helper function to wrap an elements `items` with <code class='code [.code_class]'>items</code>
+code_wrap <- function(items, .code_class = "") {
     code_class <- glue::glue("code", "{.code_class}", .sep = " ")
     if (!nzchar(.code_class)) {
         code_class <- "code"
     }
+    return(paste0(glue::glue("<code class='{code_class}'>"), items, "</code>"))
+}
+
+#' @import clisymbols
+format_list <- function(items, .code_wrap = TRUE, .code_class = "") {
     if (.code_wrap) {
-        items <- paste0(glue::glue("<code class='{code_class}'>"), items, "</code>")
+        items <- code_wrap(items, .code_class)
     }
     if (length(items) <= 5) {
         paste0(items, collapse = ", ")

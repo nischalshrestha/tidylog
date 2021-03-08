@@ -29,11 +29,21 @@ log_rename <- function(.data, .fun, .funname, ...) {
     if (!"data.frame" %in% class(.data) | !should_display()) {
         return(newdata)
     }
+    # this captures all of the arguments as unevaluated expressions which is used
+    # to infer parameter info
+    args <- rlang::enquos(...)
+    # set up some repetitive strings
+    fun_name <- glue::glue("<code class='code'>{.funname}</code>")
+
     renamed_cols <- setdiff(names(newdata), cols)
     n <- length(renamed_cols)
     if (n > 0) {
-        display(glue::glue("{.funname}: renamed {plural(n, 'variable')}",
-                       " ({format_list(renamed_cols)})"))
+        # get the "old" to "new" strings
+        all_renamed_pairs <- get_column_change_pairs(args, renamed_cols)
+        display(glue::glue(
+            "{fun_name} does not change the data shape.",
+            "{fun_name} renamed {plural(n, 'variable')}",
+            "({format_list(all_renamed_pairs, .code_wrap = FALSE)})", .sep = " "))
     }
     newdata
 }

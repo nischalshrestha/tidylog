@@ -33,6 +33,8 @@ log_select <- function(.data, .fun, .funname, ...) {
     newcols <- names(newdata)
     dropped_vars <- setdiff(cols, newcols)
     renamed_vars <- setdiff(newcols, cols)
+    # this captures all of the arguments as unevaluated expressions which is used
+    # to infer parameter info
     args <- rlang::enquos(...)
 
     # set up some repetitive strings

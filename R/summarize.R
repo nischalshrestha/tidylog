@@ -60,18 +60,46 @@ log_summarize <- function(.data, .fun, .funname, ...) {
         return(newdata)
     }
 
+    cols <- names(.data)
+    newcols <- names(newdata)
+    renamed_vars <- setdiff(newcols, cols)
+    # this captures all of the arguments as unevaluated expressions which is used
+    # to infer parameter info
+    args <- rlang::enquos(...)
+    new_vars <- names(args)
+    new_vars_values <- as.character(lapply(args, function(x) rlang::quo_squash(x)))
+    var_to_values_pairs <- paste0(code_wrap(new_vars, .code_class = "visible-change"), " via ", code_wrap(new_vars_values))
+
+    # set up some repetitive strings
+    fun_name <- glue::glue("<code class='code'>{.funname}</code>")
+    data_change_summary <- get_shape_summary(fun_name, .data, newdata)
+    # summarise the new variables + aggregate expression used for each.
+    new_vars_summary <- glue::glue(
+        "{fun_name} created {plural(length(new_vars), 'variable')}",
+        "({format_list(var_to_values_pairs, .code_wrap = F)}).",
+        .sep = " "
+    )
+
     group_vars <- get_groups(newdata)
     group_length <- length(group_vars)
     if (group_length > 0) {
+        pre <- "is"
+        if (group_length > 1) {
+           pre <- "are"
+        }
         display(glue::glue(
-            "{.funname}: now {plural(nrow(newdata), 'row')} and ",
-            "{plural(ncol(newdata), 'column')}, ",
-            "{plural(group_length, 'group variable')} remaining ",
-            "({format_list(group_vars)})"))
+            "{data_change_summary}",
+            "{new_vars_summary}",
+            "There {pre} {plural(group_length, 'group variable')} remaining",
+            "({format_list(group_vars)}).",
+            # example of an extra note which could be customized via hook function
+            "<div><i class='far fa-lightbulb'></i> Keep in mind, the data is internally grouped according to {format_list(group_vars, .code_class='internal-change')}.</div>",
+            .sep = " "))
     } else {
         display(glue::glue(
-            "{.funname}: now {plural(nrow(newdata), 'row')} and ",
-            "{plural(ncol(newdata), 'column')}, ungrouped"))
+            "{data_change_summary}",
+            "{new_vars_summary}",
+            "The data is now ungrouped.", .sep = " "))
     }
 
     newdata
