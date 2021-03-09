@@ -92,6 +92,7 @@ log_summarize <- function(.data, .fun, .funname, ...) {
             "{new_vars_summary}",
             "There {pre} {plural(group_length, 'group variable')} remaining",
             "({format_list(group_vars)}).",
+            "<hr>",
             # example of an extra note which could be customized via hook function
             "<div><i class='far fa-lightbulb'></i> Keep in mind, the data is internally grouped according to {format_list(group_vars, .code_class='internal-change')}.</div>",
             .sep = " "))
