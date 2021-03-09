@@ -66,25 +66,31 @@ log_mutate <- function(.data, .fun, .funname, ...) {
         return(newdata)
     }
 
+    # set up some repetitive strings
+    fun_name <- code_wrap(.funname)
+    data_change_summary <- get_shape_summary(fun_name, .data, newdata)
+
     # add group status
-    prefix <- ifelse(dplyr::is.grouped_df(newdata),
-        glue::glue("{.funname} (grouped):"),
-        glue::glue("{.funname}:"))
+    original <- ifelse(dplyr::is.grouped_df(newdata),
+                       glue::glue("{fun_name} (grouped)"),
+                       glue::glue("{fun_name}"))
 
-    if (grepl("transmute", .funname)) {
-        dropped_vars <- setdiff(names(.data), names(newdata))
-        n <- length(dropped_vars)
-        if (ncol(newdata) == 0) {
-            display(glue::glue("{prefix} dropped all variables"))
-            return(newdata)
-        } else if (length(dropped_vars) > 0) {
-            display(glue::glue("{prefix} dropped {plural(n, 'variable')}",
-                           " ({format_list(dropped_vars)})"))
-            # replace by spaces
-            prefix <- paste0(rep(" ", nchar(prefix)), collapse = "")
-        }
+    # mentione dropped variables too
+    dropped_vars <- setdiff(names(.data), names(newdata))
+    n <- length(dropped_vars)
+    dropped_summary <- NULL
+    if (ncol(newdata) == 0) {
+        display(glue::glue("dropped all variables"))
+        return(newdata)
+    } else if (length(dropped_vars) > 0) {
+        dropped_summary <- glue::glue("dropped {plural(n, 'variable')} ({format_list(dropped_vars)})")
     }
+    # }
+    prefix <- paste(data_change_summary)
+    summaries <- c(dropped_summary)
 
+    # construct summaries for each variable in the newdata
+    # TODO I bet this could be simplified if we did things via rlang::enquos instead
     has_changed <- FALSE
     for (var in names(newdata)) {
         # new var
@@ -92,10 +98,8 @@ log_mutate <- function(.data, .fun, .funname, ...) {
             has_changed <- TRUE
             n <- length(unique(newdata[[var]]))
             p_na <- percent(sum(is.na(newdata[[var]])), length(newdata[[var]]))
-            display(glue::glue("{prefix} new variable '{var}' ({get_type(newdata[[var]])}) ",
-                "with {plural(n, 'value', 'unique ')} and {p_na} NA"))
-            # replace by spaces
-            prefix <- paste0(rep(" ", nchar(prefix)), collapse = "")
+            summaries <- c(summaries, glue::glue("added new variable {code_wrap(var, .code_class = 'visible-change')} ({get_type(newdata[[var]])}) ",
+                                        "with {plural(n, 'value', 'unique ')} and {p_na} {span_wrap('NA')}"))
         } else {
             # existing var
             # use identical to account for missing values - this is fast
@@ -131,32 +135,33 @@ log_mutate <- function(.data, .fun, .funname, ...) {
                 p <- percent(n, length(different))
                 new_na <- sum(is.na(new)) - sum(is.na(old))
                 na_text <- plural(abs(new_na), "NA", mid = ifelse(new_na >= 0, "new ", "fewer "))
-                display(glue::glue("{prefix} changed {plural(n, 'value')} ",
-                    "({p}) of '{var}' ({na_text})"))
-                # replace by spaces
-                prefix <- paste0(rep(" ", nchar(prefix)), collapse = "")
+                summaries <- c(summaries, glue::glue("changed {plural(n, 'value')} ",
+                                                     "({p}) of '{code_wrap(var, .code_class = 'visible-change')}' ({na_text})"))
             } else {
                 # different type
                 new_na <- sum(is.na(new)) - sum(is.na(old))
                 if (new_na == length(new)) {
-                    display(glue::glue("{prefix} converted '{var}' from {typeold}",
-                        " to {typenew} (now 100% NA)"))
-                    # replace by spaces
-                    prefix <- paste0(rep(" ", nchar(prefix)), collapse = "")
+                    summaries <- c(summaries, glue::glue("converted {code_wrap(var, .code_class = 'visible-change')} from {typeold}",
+                                                                     " to {typenew} (now 100% {span_wrap('NA')})"))
                 } else {
                     na_text <- glue::glue("{abs(new_na)} ",
-                                          ifelse(new_na >= 0, "new", "fewer"), " NA")
-                    display(glue::glue("{prefix} converted '{var}' from {typeold}",
-                        " to {typenew} ({na_text})"))
-                    # replace by spaces
-                    prefix <- paste0(rep(" ", nchar(prefix)), collapse = "")
+                                          ifelse(new_na >= 0, "new", "fewer"), " {span_wrap('NA')}")
+                    summaries <- c(summaries, glue::glue("converted {code_wrap(var, .code_class = 'visible-change')} from {typeold}",
+                                                                     " to {typenew} ({na_text})"))
                 }
             }
         }
     }
 
+    # ; separate all the summaries
+    summaries <- paste0(summaries, collapse = "; ")
+    # prepend with the function code text
+    summaries <- paste(fun_name, summaries)
+
+    display(glue::glue("{prefix} {summaries}."))
+
     if (!has_changed) {
-        display(glue::glue("{prefix} no changes"))
+        display(glue::glue("{prefix} resulted in no changes."))
     }
     newdata
 }

@@ -10,7 +10,7 @@ log_rowwise <- function(.data, .fun, .funname, ...) {
     }
 
     # set up some repetitive strings
-    fun_name <- code_wrap(.funname, .code_class = "code")
+    fun_name <- code_wrap(.funname)
     data_change_summary <- glue::glue("{fun_name} has no visible effect on the data.")
 
     display(glue::glue(

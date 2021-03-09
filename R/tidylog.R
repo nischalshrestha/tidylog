@@ -1,13 +1,18 @@
-plural <- function(n_items, noun, mid = "", .span_class = "") {
+# helper function to wrap an element `x` with <span class='number [.code_class]'>x</span>
+span_wrap <- function(x, .span_class = "") {
     span_class <- glue::glue("number", "{.span_class}", .sep = " ")
     if (!nzchar(.span_class)) {
         span_class <- "number"
     }
+    return(paste0(glue::glue("<span class='{span_class}'>"), x, "</span>"))
+}
+
+plural <- function(n_items, noun, mid = "", .span_class = "") {
     if (n_items == 1) {
         return(paste0("one ", mid, noun))
     } else {
         return(paste0(
-            glue::glue("<span class='{span_class}'>", format(n_items, big.mark = ",", scientific = FALSE),"</span>"),
+            span_wrap(format(n_items, big.mark = ",", scientific = FALSE), .span_class),
             " ", mid, noun, "s"
         ))
     }
@@ -24,10 +29,6 @@ shorten <- function(str) {
 percent <- function(n, total, .span_class = "") {
     p <- round(n / total * 100)
     rtn <- ""
-    span_class <- glue::glue("number", "{.span_class}", .sep = " ")
-    if (!nzchar(.span_class)) {
-        span_class <- "number"
-    }
     if (n == total) {
         rtn <- "100%"
     } else if (p == 100) {
@@ -39,7 +40,7 @@ percent <- function(n, total, .span_class = "") {
     } else {
         rtn <- paste0(p, "%")
     }
-    paste0(glue::glue("<span class='{span_class}'>"), rtn, "</span>")
+    return(span_wrap(rtn, .span_class))
 }
 
 # helper function to wrap an elements `items` with <code class='code [.code_class]'>items</code>
@@ -57,9 +58,9 @@ format_list <- function(items, .code_wrap = TRUE, .code_class = "") {
         items <- code_wrap(items, .code_class)
     }
     if (length(items) <= 5) {
-        paste0(items, collapse = ", ")
+        return(paste0(items, collapse = ", "))
     } else {
-        paste0(c(items[1:5], clisymbols::symbol$ellipsis), collapse = ", ")
+        return(paste0(c(items[1:5], clisymbols::symbol$ellipsis), collapse = ", "))
     }
 }
 
