@@ -36,7 +36,8 @@ log_longer_wider <- function(.data, .fun, .funname, ...) {
     } else if (.funname %in% c("gather", "pivot_longer")) {
         verb <- "lengthened"
     }
-    fun_name <- glue::glue("<code class='code'>{.funname}</code>")
+    # set up some repetitive strings
+    fun_name <- code_wrap(.funname)
     data_change_summary <- get_shape_summary(fun_name, .data, newdata)
 
     display(glue::glue(

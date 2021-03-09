@@ -1,8 +1,15 @@
-plural <- function(n_items, noun, mid = "") {
+plural <- function(n_items, noun, mid = "", .span_class = "") {
+    span_class <- glue::glue("number", "{.span_class}", .sep = " ")
+    if (!nzchar(.span_class)) {
+        span_class <- "number"
+    }
     if (n_items == 1) {
-        paste0("one ", mid, noun)
+        return(paste0("one ", mid, noun))
     } else {
-        paste0(format(n_items, big.mark = ",", scientific = FALSE), " ", mid, noun, "s")
+        return(paste0(
+            glue::glue("<span class='{span_class}'>", format(n_items, big.mark = ",", scientific = FALSE),"</span>"),
+            " ", mid, noun, "s"
+        ))
     }
 }
 
@@ -14,19 +21,25 @@ shorten <- function(str) {
     }
 }
 
-percent <- function(n, total) {
+percent <- function(n, total, .span_class = "") {
     p <- round(n / total * 100)
-    if (n == total) {
-        "100%"
-    } else if (p == 100) {
-        ">99%"
-    } else if (n == 0) {
-        "0%"
-    } else if (p == 0) {
-        "<1%"
-    } else {
-        paste0(p, "%")
+    rtn <- ""
+    span_class <- glue::glue("number", "{.span_class}", .sep = " ")
+    if (!nzchar(.span_class)) {
+        span_class <- "number"
     }
+    if (n == total) {
+        rtn <- "100%"
+    } else if (p == 100) {
+        rtn <- ">99%"
+    } else if (n == 0) {
+        rtn <- "0%"
+    } else if (p == 0) {
+        rtn <- "<1%"
+    } else {
+        rtn <- paste0(p, "%")
+    }
+    paste0(glue::glue("<span class='{span_class}'>"), rtn, "</span>")
 }
 
 # helper function to wrap an elements `items` with <code class='code [.code_class]'>items</code>

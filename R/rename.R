@@ -33,7 +33,7 @@ log_rename <- function(.data, .fun, .funname, ...) {
     # to infer parameter info
     args <- rlang::enquos(...)
     # set up some repetitive strings
-    fun_name <- glue::glue("<code class='code'>{.funname}</code>")
+    fun_name <- code_wrap(.funname)
 
     renamed_cols <- setdiff(names(newdata), cols)
     n <- length(renamed_cols)

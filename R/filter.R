@@ -101,18 +101,25 @@ log_filter <- function(.data, .fun, .funname, ...) {
         return(newdata)
     }
 
+    # set up some repetitive strings
+    fun_name <- code_wrap(.funname)
+    data_change_summary <- get_shape_summary(fun_name, .data, newdata)
+
     group_status <- ifelse(dplyr::is.grouped_df(newdata), " (grouped)", "")
 
     n <- nrow(.data) - nrow(newdata)
     if (n == 0) {
-        display(glue::glue("{.funname}{group_status}: no rows removed"))
+        display(glue::glue(data_change_summary, "{fun_name}{group_status} did not remove any rows.", .sep = " "))
     } else if (n == nrow(.data)) {
-        display(glue::glue("{.funname}{group_status}: removed all rows (100%)"))
+        display(glue::glue(data_change_summary, "{fun_name}{group_status} removed all rows (100%).", .sep = " "))
     } else {
         total <- nrow(.data)
-        display(glue::glue("{.funname}{group_status}: ",
-            "removed {plural(n, 'row')} ",
-            "({percent(n, {total})}), {plural(nrow(newdata), 'row')} remaining"))
+        display(glue::glue(
+                data_change_summary,
+                "{fun_name}{group_status}",
+                "removed {plural(n, 'row')}",
+                "({percent(n, {total})}), with {plural(nrow(newdata), 'row')} remaining.",
+                .sep = " "))
     }
     newdata
 }

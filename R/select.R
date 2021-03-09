@@ -38,7 +38,7 @@ log_select <- function(.data, .fun, .funname, ...) {
     args <- rlang::enquos(...)
 
     # set up some repetitive strings
-    fun_name <- glue::glue("<code class='code'>{.funname}</code>")
+    fun_name <- code_wrap(.funname)
     data_change_summary <- get_shape_summary(fun_name, .data, newdata)
 
     if (ncol(newdata) == 0) {

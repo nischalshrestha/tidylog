@@ -71,7 +71,7 @@ log_summarize <- function(.data, .fun, .funname, ...) {
     var_to_values_pairs <- paste0(code_wrap(new_vars, .code_class = "visible-change"), " via ", code_wrap(new_vars_values))
 
     # set up some repetitive strings
-    fun_name <- glue::glue("<code class='code'>{.funname}</code>")
+    fun_name <- code_wrap(.funname)
     data_change_summary <- get_shape_summary(fun_name, .data, newdata)
     # summarise the new variables + aggregate expression used for each.
     new_vars_summary <- glue::glue(
