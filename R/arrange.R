@@ -13,6 +13,10 @@ log_arrange <- function(.data, .fun, .funname, ...) {
     # this captures all of the arguments as unevaluated expressions which is used
     # to infer parameter info
     args <- rlang::enquos(...)
+    # filter out the formal parameters
+    # for arrange, if an argument had a name, it's a formal
+    # so we only filter for the args without a name
+    args <- args[names(args) == ""]
 
     # squash all of the args
     args_squashed <- lapply(args, function(x) {

@@ -135,10 +135,21 @@ get_shape_summary <- function(fun_name, .data, newdata) {
 # helper function used in verbs like `select`/`rename` to return a comma separated character vector
 # of "old" to "new" column name pairs
 get_column_change_pairs <- function(args, renamed_vars) {
-    renamed_from <- lapply(args[renamed_vars], function(x) rlang::as_name(x))
+    # make sure to only get the arguments regarding new columns/variables
+    new_vars <- args[renamed_vars]
+    renamed_from <- lapply(new_vars, function(x) rlang::as_name(x))
     formatted_names <- paste0("<code class = 'code visible-change'>", names(renamed_from), "</code>")
     formatted_vals <- paste0("<code class = 'code'>", renamed_from, "</code>")
     return(paste0(formatted_vals, " to ", formatted_names))
+}
+
+# helper function for verbs like `select`/`rename` to only retrieve arguments passed in
+# which deal with new variables and not formal parameters
+get_column_vars <- function(args, .fun) {
+    new_vars <- names(args)
+    # filter out the formal parameters
+    new_vars <- new_vars[!new_vars %in% names(formals(.fun))]
+    args[new_vars]
 }
 
 #' outputs some information about the data frame/tbl

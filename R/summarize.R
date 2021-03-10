@@ -66,7 +66,10 @@ log_summarize <- function(.data, .fun, .funname, ...) {
     # this captures all of the arguments as unevaluated expressions which is used
     # to infer parameter info
     args <- rlang::enquos(...)
+    # filter out the formal parameters
     new_vars <- names(args)
+    new_vars <- new_vars[!new_vars %in% names(formals(dplyr::summarise))]
+    args <- args[new_vars]
     new_vars_values <- as.character(lapply(args, function(x) rlang::quo_squash(x)))
     var_to_values_pairs <- paste0(code_wrap(new_vars, .code_class = "visible-change"), " via ", code_wrap(new_vars_values))
 

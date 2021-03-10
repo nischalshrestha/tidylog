@@ -32,6 +32,8 @@ log_rename <- function(.data, .fun, .funname, ...) {
     # this captures all of the arguments as unevaluated expressions which is used
     # to infer parameter info
     args <- rlang::enquos(...)
+    # filter out the formal parameters
+    args <- get_column_vars(args, .fun)
     # set up some repetitive strings
     fun_name <- code_wrap(.funname)
 
