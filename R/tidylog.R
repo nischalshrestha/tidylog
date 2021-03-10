@@ -90,8 +90,13 @@ get_groups <- function(.data) {
 }
 
 #' @import rlang
-display <- function(text) {
+display <- function(text, callout_words = NULL) {
+    str(callout_words)
     functions <- getOption("tidylog.display")
+    callout_function <- getOption("tidylog.callouts")
+    if (!is.null(callout_function)) {
+        callout_function(callout_words)
+    }
     if (is.null(functions)) {
         rlang::inform(text)
     } else if (is.list(functions)) {

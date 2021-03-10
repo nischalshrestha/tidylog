@@ -46,7 +46,8 @@ log_group_by <- function(.data, .fun, .funname, ...) {
             "<i class='far fa-lightbulb'></i> {code_wrap('group_by()')} doesn't really do anything itself; it just changes how the other verbs work.",
             "It now allows us to execute functions like {code_wrap('summarise')} to perform statistics by groups ({format_list(group_vars, .code_class ='internal-change')}).",
             "</div>",
-            .sep = " ")
+            .sep = " "),
+            callout_words = lapply(group_vars, function(x) list(word = x, change = "internal-change"))
         )
     }
     newdata

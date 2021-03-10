@@ -50,7 +50,9 @@ log_select <- function(.data, .fun, .funname, ...) {
         # get the "old" to "new" strings
         all_renamed_pairs <- get_column_change_pairs(args, renamed_vars)
         display(glue::glue("{data_change_summary}", "{fun_name} renamed {plural(length(renamed_vars), 'variable')}",
-                           "({format_list(all_renamed_pairs, .code_wrap = FALSE)})", .sep = " "))
+                           "({format_list(all_renamed_pairs, .code_wrap = FALSE)})", .sep = " "),
+                callout_words = lapply(renamed_vars, function(x) list(word = x, change = "visible-change"))
+        )
     } else if (length(dropped_vars) > 0 & length(renamed_vars) > 0) {
         # dropped & renamed
         # get the "old" to "new" strings
@@ -59,7 +61,9 @@ log_select <- function(.data, .fun, .funname, ...) {
         display(glue::glue("{data_change_summary}",
                            "{fun_name} renamed {plural(length(renamed_vars), 'variable')}",
                            "({format_list(all_renamed_pairs, .code_wrap = FALSE)})",
-                           "and dropped {plural(n_dropped, 'variable')}.", .sep = " "))
+                           "and dropped {plural(n_dropped, 'variable')}.", .sep = " "),
+                callout_words = lapply(renamed_vars, function(x) list(word = x, change = "visible-change"))
+            )
     } else if (length(dropped_vars) > 0) {
         # dropped only
         display(glue::glue("{data_change_summary}", "{fun_name} dropped {plural(length(dropped_vars), 'variable')}",
