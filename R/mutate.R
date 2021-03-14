@@ -85,12 +85,14 @@ log_mutate <- function(.data, .fun, .funname, ...) {
     } else if (length(dropped_vars) > 0) {
         dropped_summary <- glue::glue("dropped {plural(n, 'variable')} ({format_list(dropped_vars)})")
     }
-    # }
     prefix <- paste(data_change_summary)
     summaries <- c(dropped_summary)
 
+    # a list of callouts for code text
+    callout_words <- list()
+
     # construct summaries for each variable in the newdata
-    # TODO I bet this could be simplified if we did things via rlang::enquos instead
+    # TODO I bet this could be simplified if we did things via rlang::enquos instead?
     has_changed <- FALSE
     for (var in names(newdata)) {
         # new var
@@ -151,6 +153,8 @@ log_mutate <- function(.data, .fun, .funname, ...) {
                 }
             }
         }
+        # add to the callout word lists
+        callout_words <- append(callout_words, list(list(word = var, change = "visible-change")))
     }
 
     # ; separate all the summaries
@@ -158,10 +162,10 @@ log_mutate <- function(.data, .fun, .funname, ...) {
     # prepend with the function code text
     summaries <- paste(fun_name, summaries)
 
-    display(glue::glue("{prefix} {summaries}."))
-
+    display(glue::glue("{prefix} {summaries}."), callout_words = callout_words)
     if (!has_changed) {
         display(glue::glue("{prefix} resulted in no changes."))
     }
+
     newdata
 }
