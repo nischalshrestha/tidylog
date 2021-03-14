@@ -37,15 +37,17 @@ log_rename <- function(.data, .fun, .funname, ...) {
     # set up some repetitive strings
     fun_name <- code_wrap(.funname)
 
-    renamed_cols <- setdiff(names(newdata), cols)
-    n <- length(renamed_cols)
+    renamed_vars <- setdiff(names(newdata), cols)
+    n <- length(renamed_vars)
     if (n > 0) {
         # get the "old" to "new" strings
-        all_renamed_pairs <- get_column_change_pairs(args, renamed_cols)
+        all_renamed_pairs <- get_column_change_pairs(args, renamed_vars)
         display(glue::glue(
             "{fun_name} does not change the data shape.",
             "{fun_name} renamed {plural(n, 'variable')}",
-            "({format_list(all_renamed_pairs, .code_wrap = FALSE)})", .sep = " "))
+            "({format_list(all_renamed_pairs, .code_wrap = FALSE)})", .sep = " "),
+            callout_words = lapply(renamed_vars, function(x) list(word = x, change = "visible-change"))
+        )
     }
     newdata
 }

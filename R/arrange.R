@@ -47,11 +47,19 @@ log_arrange <- function(.data, .fun, .funname, ...) {
     # set up some repetitive strings
     fun_name <- code_wrap(.funname)
     data_change_summary <- glue::glue("{fun_name} does not change the data shape.")
-    display(glue::glue(
-        data_change_summary,
+    callout_words <- lapply(col_variables, function(x) list(word = as.character(x), change = "visible-change"))
+    # GOTCHA: not sure of exact reason but we're working on a list `col_variables`, so we have to nullify the names
+    # so that if we did a shiny:::toJSON (e.g. when communicating with JS) we won't get an output like
+    # {"1":{"word":"color","change":"visible-change"}}
+    # the names after the lapply is apparently "" :(
+    names(callout_words) <- NULL
+    display(glue::glue(data_change_summary,
         "{fun_name} sorted the data by {plural(length(col_variables), 'variable')}",
         "({format_list(col_sort_order_summary, .code_wrap = F)}).", .sep = " "
-    ))
+        ),
+        # Note: for arrange, we have to turn the column variables back to string when constructing callout words
+        callout_words = callout_words
+    )
 
     newdata
 }

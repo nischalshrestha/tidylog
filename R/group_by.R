@@ -50,5 +50,6 @@ log_group_by <- function(.data, .fun, .funname, ...) {
             callout_words = lapply(group_vars, function(x) list(word = x, change = "internal-change"))
         )
     }
+
     newdata
 }

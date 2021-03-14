@@ -90,7 +90,7 @@ get_groups <- function(.data) {
 }
 
 #' @import rlang
-display <- function(text, callout_words = NULL) {
+display <- function(text, callout_words = list()) {
     str(callout_words)
     functions <- getOption("tidylog.display")
     callout_function <- getOption("tidylog.callouts")
