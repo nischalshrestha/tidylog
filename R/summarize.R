@@ -98,12 +98,16 @@ log_summarize <- function(.data, .fun, .funname, ...) {
             "<hr>",
             # example of an extra note which could be customized via hook function
             "<div><i class='far fa-lightbulb'></i> Keep in mind, the data is internally grouped according to {format_list(group_vars, .code_class='internal-change')}.</div>",
-            .sep = " "))
+            .sep = " "),
+            callout_words = lapply(new_vars, function(x) list(word = x, change = "visible-change"))
+        )
     } else {
         display(glue::glue(
             "{data_change_summary}",
             "{new_vars_summary}",
-            "The data is now ungrouped.", .sep = " "))
+            "The data is now ungrouped.", .sep = " "),
+            callout_words = lapply(new_vars, function(x) list(word = x, change = "visible-change"))
+        )
     }
 
     newdata

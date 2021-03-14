@@ -29,7 +29,7 @@ log_longer_wider <- function(.data, .fun, .funname, ...) {
     newcols <- setdiff(names(newdata), names(.data))
     oldcols <- setdiff(names(.data), names(newdata))
 
-    # set up some repetitive strings
+    # set up verb describing pivot action and collect any code text callout words
     verb <- ""
     if (.funname %in% c("spread", "pivot_wider")) {
         verb <- "widened"
@@ -45,7 +45,9 @@ log_longer_wider <- function(.data, .fun, .funname, ...) {
         "{fun_name} {verb} the data by reorganizing ({format_list(oldcols)})",
         "into ({format_list(code_wrap(newcols, .code_class = 'visible-change'), .code_wrap = F)}).",
         .sep = " "
-    ))
+        ),
+        callout_words = lapply(newcols, function(x) list(word = x, change = "visible-change"))
+    )
 
     newdata
 }

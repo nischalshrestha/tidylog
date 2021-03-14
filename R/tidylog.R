@@ -57,11 +57,7 @@ format_list <- function(items, .code_wrap = TRUE, .code_class = "") {
     if (.code_wrap) {
         items <- code_wrap(items, .code_class)
     }
-    if (length(items) <= 5) {
-        return(paste0(items, collapse = ", "))
-    } else {
-        return(paste0(c(items[1:5], clisymbols::symbol$ellipsis), collapse = ", "))
-    }
+    return(paste0(items, collapse = ", "))
 }
 
 get_type <- function(v) {
