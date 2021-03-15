@@ -39,14 +39,21 @@ log_longer_wider <- function(.data, .fun, .funname, ...) {
     # set up some repetitive strings
     fun_name <- code_wrap(.funname)
     data_change_summary <- get_shape_summary(fun_name, .data, newdata)
+    # add group or rowwise status
+    original <- function_prefix(fun_name, newdata)
+    group_cols <- dplyr::group_vars(newdata)
 
     display(glue::glue(
         data_change_summary,
-        "{fun_name} {verb} the data by reorganizing ({format_list(oldcols)})",
+        "{original} {verb} the data by reorganizing ({format_list(oldcols)})",
         "into ({format_list(code_wrap(newcols, .code_class = 'visible-change'), .code_wrap = F)}).",
         .sep = " "
         ),
-        callout_words = lapply(newcols, function(x) list(word = x, change = "visible-change"))
+        callout_words =
+            append(
+                lapply(newcols, function(x) list(word = x, change = "visible-change")),
+                lapply(group_cols, function(x) list(word = x, change = "internal-change")),
+            )
     )
 
     newdata

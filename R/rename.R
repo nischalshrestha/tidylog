@@ -37,6 +37,10 @@ log_rename <- function(.data, .fun, .funname, ...) {
     # set up some repetitive strings
     fun_name <- code_wrap(.funname)
 
+    # add group or rowwise status
+    original <- function_prefix(fun_name, newdata)
+    group_cols <- dplyr::group_vars(newdata)
+
     renamed_vars <- setdiff(names(newdata), cols)
     n <- length(renamed_vars)
     if (n > 0) {
@@ -44,9 +48,12 @@ log_rename <- function(.data, .fun, .funname, ...) {
         all_renamed_pairs <- get_column_change_pairs(args, renamed_vars)
         display(glue::glue(
             "{fun_name} does not change the data shape.",
-            "{fun_name} renamed {plural(n, 'variable')}",
+            "{original} renamed {plural(n, 'variable')}",
             "({format_list(all_renamed_pairs, .code_wrap = FALSE)})", .sep = " "),
-            callout_words = lapply(renamed_vars, function(x) list(word = x, change = "visible-change"))
+            callout_words = append(
+                lapply(renamed_vars, function(x) list(word = x, change = "visible-change")),
+                lapply(group_cols, function(x) list(word = x, change = "internal-change"))
+            )
         )
     }
     newdata

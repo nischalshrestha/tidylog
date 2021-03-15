@@ -105,21 +105,31 @@ log_filter <- function(.data, .fun, .funname, ...) {
     fun_name <- code_wrap(.funname)
     data_change_summary <- get_shape_summary(fun_name, .data, newdata)
 
-    group_status <- ifelse(dplyr::is.grouped_df(newdata), " (grouped)", "")
+    # add group or rowwise status
+    original <- function_prefix(fun_name, newdata)
+    group_cols <- dplyr::group_vars(newdata)
+
+    callout_words <- lapply(group_cols, function(x) list(word = x, change = "internal-change"))
 
     n <- nrow(.data) - nrow(newdata)
     if (n == 0) {
-        display(glue::glue(data_change_summary, "{fun_name}{group_status} did not remove any rows.", .sep = " "))
+        display(glue::glue(data_change_summary, "{original} did not remove any rows.", .sep = " "),
+                callout_words = callout_words
+        )
     } else if (n == nrow(.data)) {
-        display(glue::glue(data_change_summary, "{fun_name}{group_status} removed all rows (100%).", .sep = " "))
+        display(glue::glue(data_change_summary, "{original} removed all rows (100%).", .sep = " "),
+                callout_words = callout_words
+        )
     } else {
         total <- nrow(.data)
         display(glue::glue(
                 data_change_summary,
-                "{fun_name}{group_status}",
+                "{original}",
                 "removed {plural(n, 'row')}",
                 "({percent(n, {total})}), with {plural(nrow(newdata), 'row')} remaining.",
-                .sep = " "))
+                .sep = " "),
+                callout_words = callout_words
+        )
     }
     newdata
 }

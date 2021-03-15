@@ -133,6 +133,23 @@ get_shape_summary <- function(fun_name, .data, newdata) {
     return(data_shape_change)
 }
 
+# helper function that either returns the function name only, or
+# returns whether or not function is working on grouped or rowwise
+function_prefix <- function(fun_name, newdata, apply_class = TRUE)  {
+    original <- glue::glue("{fun_name}")
+    class_name <- ifelse(apply_class, "internal-change", "")
+    if (dplyr::is.grouped_df(newdata)) {
+        original <- glue::glue(
+            original,
+            "(working on group variables: {format_list(dplyr::group_vars(newdata), .code_class = {class_name})})",
+            .sep = " "
+        )
+    } else if (inherits(newdata, "rowwise_df")) {
+        original <- glue::glue(original, "(working on the data frame {code_wrap('row-wise', .code_class = {class_name})})", .sep = " ")
+    }
+    return(original)
+}
+
 # helper function used in verbs like `select`/`rename` to return a comma separated character vector
 # of "old" to "new" column name pairs
 get_column_change_pairs <- function(args, renamed_vars) {

@@ -43,15 +43,24 @@ log_select <- function(.data, .fun, .funname, ...) {
     fun_name <- code_wrap(.funname)
     data_change_summary <- get_shape_summary(fun_name, .data, newdata)
 
+    # add group or rowwise status
+    original <- function_prefix(fun_name, newdata)
+    group_cols <- dplyr::group_vars(newdata)
+    callout_words <- lapply(group_cols, function(x) list(word = x, change = "internal-change"))
+
     if (ncol(newdata) == 0) {
-        display(glue::glue("{data_change_summary}", "{fun_name} dropped all variables.", .sep = " "))
+        display(glue::glue("{data_change_summary}", "{original} dropped all variables.", .sep = " "),
+                callout_words = callout_words)
     } else if (length(renamed_vars) > 0 & length(renamed_vars) == length(dropped_vars)) {
         # renamed only
         # get the "old" to "new" strings
         all_renamed_pairs <- get_column_change_pairs(args, renamed_vars)
-        display(glue::glue("{data_change_summary}", "{fun_name} renamed {plural(length(renamed_vars), 'variable')}",
+        display(glue::glue("{data_change_summary}", "{original} renamed {plural(length(renamed_vars), 'variable')}",
                            "({format_list(all_renamed_pairs, .code_wrap = FALSE)})", .sep = " "),
-                callout_words = lapply(renamed_vars, function(x) list(word = x, change = "visible-change"))
+                callout_words = append(
+                    lapply(renamed_vars, function(x) list(word = x, change = "visible-change")),
+                    callout_words
+                )
         )
     } else if (length(dropped_vars) > 0 & length(renamed_vars) > 0) {
         # dropped & renamed
@@ -59,22 +68,31 @@ log_select <- function(.data, .fun, .funname, ...) {
         all_renamed_pairs <- get_column_change_pairs(args, renamed_vars)
         n_dropped <- length(dropped_vars) - length(renamed_vars)
         display(glue::glue("{data_change_summary}",
-                           "{fun_name} renamed {plural(length(renamed_vars), 'variable')}",
+                           "{original} renamed {plural(length(renamed_vars), 'variable')}",
                            "({format_list(all_renamed_pairs, .code_wrap = FALSE)})",
                            "and dropped {plural(n_dropped, 'variable')}.", .sep = " "),
-                callout_words = lapply(renamed_vars, function(x) list(word = x, change = "visible-change"))
+                callout_words = append(
+                    lapply(renamed_vars, function(x) list(word = x, change = "visible-change")),
+                    callout_words
+                )
             )
     } else if (length(dropped_vars) > 0) {
         # dropped only
-        display(glue::glue("{data_change_summary}", "{fun_name} dropped {plural(length(dropped_vars), 'variable')}",
-                           "({format_list(dropped_vars)}).", .sep = " "))
+        display(glue::glue("{data_change_summary}", "{original} dropped {plural(length(dropped_vars), 'variable')}",
+                           "({format_list(dropped_vars)}).", .sep = " "),
+                callout_words = callout_words
+        )
     } else {
         # no dropped, no removed
         if (all(names(newdata) == cols)) {
-            display(glue::glue("{data_change_summary}", "{fun_name} resulted in no changes.", .sep = " "))
+            display(glue::glue("{data_change_summary}", "{original} resulted in no changes.", .sep = " "),
+                    callout_words = callout_words
+            )
         } else {
-            display(glue::glue("{data_change_summary}", "{fun_name} reordered columns",
-                               "({format_list(names(newdata))}).", .sep = " "))
+            display(glue::glue("{data_change_summary}", "{original} reordered columns",
+                               "({format_list(names(newdata))}).", .sep = " "),
+                    callout_words = callout_words
+            )
         }
     }
 

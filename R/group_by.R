@@ -33,10 +33,20 @@ log_group_by <- function(.data, .fun, .funname, ...) {
     fun_name <- code_wrap(.funname)
     data_change_summary <- glue::glue("{fun_name} has no visible effect on the data.")
 
+    # tailor message depending on group status
     group_vars <- get_groups(newdata)
-    if (is.null(group_vars)) {
-        display(glue::glue("{data_change_summary}", "{fun_name} did not group any variables.", .sep = " "))
-    } else {
+    is_ungroup <- identical(.funname, "ungroup")
+    if (is_ungroup) {
+        data_change_summary <- glue::glue(
+            data_change_summary,
+            "{fun_name} instead ungrouped the previous data frame.",
+            .sep = " "
+        )
+    }
+
+    if (is.null(group_vars) && !is_ungroup) {
+        display(glue::glue("{data_change_summary}", "{fun_name} did not group any variables", .sep = " "))
+    } else if (!is_ungroup) {
         display(glue::glue(
             "{data_change_summary}",
             "{fun_name} has internally grouped {plural(length(group_vars), 'variable')}",
@@ -49,6 +59,8 @@ log_group_by <- function(.data, .fun, .funname, ...) {
             .sep = " "),
             callout_words = lapply(group_vars, function(x) list(word = x, change = "internal-change"))
         )
+    } else {
+        display(data_change_summary)
     }
 
     newdata

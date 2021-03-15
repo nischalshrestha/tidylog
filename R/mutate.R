@@ -70,22 +70,21 @@ log_mutate <- function(.data, .fun, .funname, ...) {
     fun_name <- code_wrap(.funname)
     data_change_summary <- get_shape_summary(fun_name, .data, newdata)
 
-    # add group status
-    original <- ifelse(dplyr::is.grouped_df(newdata),
-                       glue::glue("{fun_name} (grouped)"),
-                       glue::glue("{fun_name}"))
+    # add group or rowwise status
+    original <- function_prefix(fun_name, newdata)
+    group_cols <- dplyr::group_vars(newdata)
 
-    # mentione dropped variables too
+    # mention dropped variables too
     dropped_vars <- setdiff(names(.data), names(newdata))
     n <- length(dropped_vars)
     dropped_summary <- NULL
     if (ncol(newdata) == 0) {
-        display(glue::glue("dropped all variables"))
+        display(glue::glue(original, "dropped all variables"))
         return(newdata)
     } else if (length(dropped_vars) > 0) {
         dropped_summary <- glue::glue("dropped {plural(n, 'variable')} ({format_list(dropped_vars)})")
     }
-    prefix <- paste(data_change_summary)
+    prefix <- paste(data_change_summary, original)
     summaries <- c(dropped_summary)
 
     # a list of callouts for code text
@@ -156,11 +155,13 @@ log_mutate <- function(.data, .fun, .funname, ...) {
         # add to the callout word lists
         callout_words <- append(callout_words, list(list(word = var, change = "visible-change")))
     }
+    callout_words <- append(
+        callout_words,
+        lapply(group_cols, function(x) list(word = x, change = "internal-change"))
+    )
 
     # ; separate all the summaries
     summaries <- paste0(summaries, collapse = "; ")
-    # prepend with the function code text
-    summaries <- paste(fun_name, summaries)
 
     display(glue::glue("{prefix} {summaries}."), callout_words = callout_words)
     if (!has_changed) {

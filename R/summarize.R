@@ -76,15 +76,18 @@ log_summarize <- function(.data, .fun, .funname, ...) {
     # set up some repetitive strings
     fun_name <- code_wrap(.funname)
     data_change_summary <- get_shape_summary(fun_name, .data, newdata)
+
+    # add group or rowwise status
+    group_vars <- get_groups(newdata)
+    group_length <- length(group_vars)
+    original <- function_prefix(fun_name, .data, apply_class = FALSE)
     # summarise the new variables + aggregate expression used for each.
     new_vars_summary <- glue::glue(
-        "{fun_name} created {plural(length(new_vars), 'variable')}",
+        "{original} created {plural(length(new_vars), 'variable')}",
         "({format_list(var_to_values_pairs, .code_wrap = F)}).",
         .sep = " "
     )
 
-    group_vars <- get_groups(newdata)
-    group_length <- length(group_vars)
     if (group_length > 0) {
         pre <- "is"
         if (group_length > 1) {
