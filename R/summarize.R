@@ -82,34 +82,41 @@ log_summarize <- function(.data, .fun, .funname, ...) {
     group_length <- length(group_vars)
     original <- function_prefix(fun_name, .data, apply_class = FALSE)
     # summarise the new variables + aggregate expression used for each.
-    new_vars_summary <- glue::glue(
-        "{original} created {plural(length(new_vars), 'variable')}",
-        "({format_list(var_to_values_pairs, .code_wrap = F)}).",
-        .sep = " "
-    )
+    new_vars_summary <- ""
+    callout_words <- list()
+    if (new_vars != "") {
+        new_vars_summary <- glue::glue(
+            "{original} created {plural(length(new_vars), 'variable')}",
+            "({format_list(var_to_values_pairs, .code_wrap = F)}).",
+            .sep = " "
+        )
+        callout_words <- lapply(new_vars, function(x) list(word = x, change = "visible-change"))
+    }
 
     if (group_length > 0) {
         pre <- "is"
         if (group_length > 1) {
            pre <- "are"
         }
+        # when we do have remaining group variables, let's call those out
+        callout_words <- append(callout_words, lapply(group_vars, function(x) list(word = x, change = "internal-change")))
         display(glue::glue(
             "{data_change_summary}",
             "{new_vars_summary}",
             "There {pre} {plural(group_length, 'group variable')} remaining",
-            "({format_list(group_vars)}).",
+            "({format_list(group_vars, .code_class = 'internal-change')}).",
             "<hr>",
             # example of an extra note which could be customized via hook function
             "<div><i class='far fa-lightbulb'></i> Keep in mind, the data is internally grouped according to {format_list(group_vars, .code_class='internal-change')}.</div>",
             .sep = " "),
-            callout_words = lapply(new_vars, function(x) list(word = x, change = "visible-change"))
+            callout_words = callout_words
         )
     } else {
         display(glue::glue(
             "{data_change_summary}",
             "{new_vars_summary}",
             "The data is now ungrouped.", .sep = " "),
-            callout_words = lapply(new_vars, function(x) list(word = x, change = "visible-change"))
+            callout_words = callout_words
         )
     }
 
