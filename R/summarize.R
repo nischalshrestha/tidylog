@@ -83,7 +83,7 @@ log_summarize <- function(.data, .fun, .funname, ...) {
     # summarise the new variables + aggregate expression used for each.
     new_vars_summary <- ""
     callout_words <- list()
-    if (!is.na(new_vars) && length(new_vars) > 0) {
+    if (!is.na(new_vars) && nzchar(new_vars)) {
         new_vars_summary <- glue::glue(
             "{original} created {plural(length(new_vars), 'variable')}",
             "({format_list(var_to_values_pairs, .code_wrap = F)}).",
