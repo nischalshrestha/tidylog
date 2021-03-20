@@ -100,7 +100,7 @@ log_mutate <- function(.data, .fun, .funname, ...) {
             n <- length(unique(newdata[[var]]))
             p_na <- percent(sum(is.na(newdata[[var]])), length(newdata[[var]]))
             summaries <- c(summaries, glue::glue("added new variable {code_wrap(var, .code_class = 'visible-change')} ({get_type(newdata[[var]])}) ",
-                                        "with {plural(n, 'value', 'unique ')} and {p_na} {span_wrap('NA')}"))
+                                        "with {plural(n, 'value', 'unique ')} and {p_na} {span_wrap('NA')}s"))
         } else {
             # existing var
             # use identical to account for missing values - this is fast
@@ -134,10 +134,12 @@ log_mutate <- function(.data, .fun, .funname, ...) {
                 }
                 n <- sum(different)
                 p <- percent(n, length(different))
+                old_na <- sum(is.na(old))
                 new_na <- sum(is.na(new)) - sum(is.na(old))
-                na_text <- plural(abs(new_na), "NA", mid = ifelse(new_na >= 0, "new ", "fewer "))
+                old_na_text <- plural(abs(old_na), span_wrap("NA"))
+                na_text <- plural(abs(new_na), span_wrap("NA"), mid = ifelse(new_na >= 0, "new ", "fewer "))
                 summaries <- c(summaries, glue::glue("changed {plural(n, 'value')} ",
-                                                     "({p}) of '{code_wrap(var, .code_class = 'visible-change')}' ({na_text})"))
+                                                     "({p}) of '{code_wrap(var, .code_class = 'visible-change')}' (previously {old_na_text}, now {na_text})"))
             } else {
                 # different type
                 new_na <- sum(is.na(new)) - sum(is.na(old))
@@ -145,10 +147,12 @@ log_mutate <- function(.data, .fun, .funname, ...) {
                     summaries <- c(summaries, glue::glue("converted {code_wrap(var, .code_class = 'visible-change')} from {typeold}",
                                                                      " to {typenew} (now 100% {span_wrap('NA')})"))
                 } else {
+                    old_na <- sum(is.na(old))
+                    old_na_text <- plural(abs(old_na), span_wrap("NA"))
                     na_text <- glue::glue("{abs(new_na)} ",
                                           ifelse(new_na >= 0, "new", "fewer"), " {span_wrap('NA')}")
                     summaries <- c(summaries, glue::glue("converted {code_wrap(var, .code_class = 'visible-change')} from {typeold}",
-                                                                     " to {typenew} ({na_text})"))
+                                                                     " to {typenew} (previously {old_na_text}, now {na_text})"))
                 }
             }
         }
