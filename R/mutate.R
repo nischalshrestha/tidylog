@@ -169,7 +169,7 @@ log_mutate <- function(.data, .fun, .funname, ...) {
 
     display(glue::glue("{prefix} {summaries}."), callout_words = callout_words)
     if (!has_changed) {
-        display(glue::glue("{prefix} resulted in no changes."))
+        display(glue::glue("{prefix} resulted in no changes."), callout_words = callout_words)
     }
 
     newdata
